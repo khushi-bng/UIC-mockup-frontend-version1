@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..400&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="css/clay.css">
+<link rel="stylesheet" href="css/home-window.css">
 </head>
 <body>
 <a href="#main" class="btn btn--clay" style="position:absolute;left:-9999px;top:12px;z-index:200"
@@ -55,12 +56,80 @@
     <div class="hero__scrim-b" aria-hidden="true"></div>
 
     <div class="hero__body">
-      <h1>Build across India<br>and the USA<em> — compliantly.</em></h1>
-      <p class="hero__sub">From entity setup to ongoing compliance and Virtual CFO support,
-         we help businesses operate confidently across both countries.</p>
+      <h1>Set up and stay compliant<br>in India<em> and the USA.</em></h1>
+      <p class="hero__sub">Incorporation, accounting, tax and virtual CFO support —
+         one team across both countries.</p>
     </div>
 
     <div class="hero__cue" aria-hidden="true"><span>Scroll</span><svg width="13" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(248,243,232,.5)" stroke-width="1.5" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg></div>
+  </section>
+
+  <!-- 1b / THE WINDOW — the Insights Constellation as the homepage's main
+       motion: a clay slab showing the constellation's cover opens into the
+       page, a feathered wipe reveals the live map, the headline travels to
+       the corners, and the window closes again. css/home-window.css and
+       js/home-window.js; the map itself is built by site.js's tease() on
+       the [data-tease] root. The copy is repeated three times on purpose
+       (ink in the cover, cream in the world, the real button on top) so the
+       wipe recolours the text and the CTA is always clickable. -->
+  <section class="win" data-window aria-label="Insights constellation">
+    <div class="win__stage">
+      <div class="win__rise" data-rise="0">
+        <div class="win__shadow" aria-hidden="true"></div>
+        <div class="win__frame">
+          <div class="win__view">
+
+            <div class="win__world">
+              <div class="win__tease" data-tease aria-hidden="true">
+                <div class="win__worldfit"><div class="tease__world"></div></div>
+              </div>
+              <div class="win__shade" aria-hidden="true"></div>
+              <div class="win__veil" aria-hidden="true"></div>
+            <div class="win__stack win__stack--dark">
+              <span class="eyebrow win__eye" data-piece="eye">Insights</span>
+              <h2 class="win__h"><span class="win__w" data-piece="w1">Think</span> <span class="win__w" data-piece="w2">globally.</span></h2>
+              <p class="win__sub" data-piece="sub">Operating across India and the USA raises questions that connect &mdash; entity structure,
+               statutory compliance on both sides, cross-border tax, and the reporting that holds it all
+               together. This is our current thinking, mapped.</p>
+              <div class="win__acts" data-piece="acts">
+                <a class="btn btn--primary" href="../Insights%20Constellation%20v20.dc.html" tabindex="-1" aria-hidden="true">Enter the constellation <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                <p class="small num win__meta">27 insights &middot; 5 questions &middot; updated monthly</p>
+              </div>
+            </div>
+            </div>
+
+            <div class="win__cover" aria-hidden="true">
+              <div class="win__map"></div>
+            <div class="win__stack win__stack--ink">
+              <span class="eyebrow win__eye" data-piece="eye">Insights</span>
+              <div class="win__h"><span class="win__w" data-piece="w1">Think</span> <span class="win__w" data-piece="w2">globally.</span></div>
+              <p class="win__sub" data-piece="sub">Operating across India and the USA raises questions that connect &mdash; entity structure,
+               statutory compliance on both sides, cross-border tax, and the reporting that holds it all
+               together. This is our current thinking, mapped.</p>
+              <div class="win__acts" data-piece="acts">
+                <a class="btn btn--primary" href="../Insights%20Constellation%20v20.dc.html" tabindex="-1" aria-hidden="true">Enter the constellation <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                <p class="small num win__meta">27 insights &middot; 5 questions &middot; updated monthly</p>
+              </div>
+            </div>
+            </div>
+
+            <div class="win__stack win__stack--acts">
+              <span class="eyebrow win__eye" data-piece="eye" aria-hidden="true">Insights</span>
+              <div class="win__h" aria-hidden="true"><span class="win__w" data-piece="w1">Think</span> <span class="win__w" data-piece="w2">globally.</span></div>
+              <p class="win__sub" data-piece="sub" aria-hidden="true">Operating across India and the USA raises questions that connect &mdash; entity structure,
+               statutory compliance on both sides, cross-border tax, and the reporting that holds it all
+               together. This is our current thinking, mapped.</p>
+              <div class="win__acts" data-piece="acts">
+                <a class="btn btn--primary" href="../Insights%20Constellation%20v20.dc.html">Enter the constellation <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                <p class="small num win__meta" aria-hidden="true">27 insights &middot; 5 questions &middot; updated monthly</p>
+              </div>
+            </div>
+
+          </div>
+          <div class="win__edge" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 2 / HOW IT WORKS — v23's five-stage track, same copy, same interaction. -->
@@ -117,25 +186,6 @@
     </div>
   </section>
 
-  <!-- 3 / CONSTELLATION TEASER -->
-  <section class="section" style="padding-top:0">
-    <div class="shell">
-      <div class="tease" data-tease data-rise="0">
-        <div class="tease__world" aria-hidden="true"></div>
-        <div class="tease__veil" aria-hidden="true"></div>
-        <div class="tease__body">
-          <span class="eyebrow eyebrow--on-dark">Insights</span>
-          <h2 style="margin-top:26px">Explore the cross-border knowledge map</h2>
-          <p class="lede" style="margin-top:22px;max-width:512px">Browse practical insights across
-             setup, compliance, tax and growth — through our interactive constellation.</p>
-          <a class="btn btn--cream" style="margin-top:40px"
-             href="../Insights%20Constellation%20v20.dc.html">Enter the constellation <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <p class="small num" style="margin-top:22px;color:rgba(248,243,232,.62)">
-             27 insights · 5 questions · updated monthly</p>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer class="ftr">
@@ -181,5 +231,6 @@
 </footer>
 
 <script src="js/site.js"></script>
+<script src="js/home-window.js"></script>
 </body>
 </html>

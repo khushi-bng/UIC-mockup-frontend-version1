@@ -932,8 +932,9 @@ a.index-row:hover .index-row__arrow { opacity: 1; transform: none; }
 .section--dark .quote__who { color: rgba(248,243,232,.5); }
 
 /* ── inline giant numerals (stats without tiles) ────────────────────────── */
-.figures-row { display: flex; flex-wrap: wrap; gap: clamp(36px, 6vw, 96px);
-  padding-top: 34px; border-top: 1px solid var(--line); }
+.figures-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 64px); padding-top: 34px; border-top: 1px solid var(--line); }
+@media (max-width: 940px) { .figures-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .section--dark .figures-row { border-color: var(--line-dark); }
 .figure-stat__val {
   font: 200 clamp(3.25rem, 6vw, 5.5rem)/1 Newsreader, Georgia, serif;

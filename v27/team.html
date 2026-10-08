@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..400&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="css/clay.css">
+<link rel="stylesheet" href="css/team-seq.css">
 </head>
 <body>
 <a href="#main" class="btn btn--clay" style="position:absolute;left:-9999px;top:12px;z-index:200"
@@ -44,7 +45,9 @@
 <main id="main">
 
   <!-- The page OPENS on the roll call: the pinned stage is the hero, and the
-       six arrive one by one as you scroll. No hero collage, no preamble. -->
+       six arrive one by one as you scroll. No hero collage, no preamble.
+       Layout/motion overrides for this section live in css/team-seq.css;
+       the scroll logic is seq() in js/site.js. -->
   <section class="seq seq--desktop section--dark" data-seq data-chrome-dark style="background:var(--dark-2)">
     <div class="seq__stage">
       <div class="seq__head">
@@ -55,17 +58,24 @@
           people on both ends of every filing.</p>
       </div>
       <div class="seq__canvas">
+        <!-- One path, laid out in the canvas's own 1440x900 units. Horizontal
+             tangent at every portrait centre: four troughs on the low band
+             (y 612), two crests flanking the title (y 272). seq() in site.js
+             draws it with scroll, clones it for the spark's tail, and rides
+             the spark along it with getPointAtLength. -->
         <svg class="seq__line" viewBox="0 0 1440 900" aria-hidden="true">
-          <path pathLength="1" vector-effect="non-scaling-stroke"
-                d="M -40 427 C 60 427, 60 423, 122 423
-                   S 240 306, 317 306
-                   S 470 567, 540 567
-                   S 830 567, 900 567
-                   S 1050 306, 1123 306
-                   S 1290 423, 1318 423
-                   S 1440 427, 1480 427"/>
+          <path class="seq__draw" pathLength="1" vector-effect="non-scaling-stroke"
+                d="M -40 612 L 150 612
+                   C 237.5 612, 237.5 272, 325 272
+                   C 450 272, 450 612, 575 612
+                   L 865 612
+                   C 990 612, 990 272, 1115 272
+                   C 1202.5 272, 1202.5 612, 1290 612
+                   L 1480 612"/>
+          <circle class="seq__spark-ring" r="8" cx="-40" cy="612"/>
+          <circle class="seq__spark" r="3.2" cx="-40" cy="612"/>
         </svg>
-        <div class="seq__item" data-on="false" style="left:122px;top:423px;--w:1.0;--r:-2.2deg">
+        <div class="seq__item" data-on="false" style="left:150px;top:612px;--w:.76">
           <figure class="figure">
             <div class="figure__frame ar-34" style="box-shadow:var(--clay-dark)">
               <img src="img/live/team-harrsh-jain.webp" alt="CA Harrsh Jain" loading="eager" decoding="async"></div>
@@ -75,7 +85,7 @@
             </div>
           </figure>
         </div>
-        <div class="seq__item" data-on="false" data-cap="top" style="left:317px;top:306px;--w:0.88;--r:1.8deg">
+        <div class="seq__item" data-on="false" style="left:325px;top:272px;--w:.76">
           <figure class="figure">
             <div class="figure__frame ar-34" style="box-shadow:var(--clay-dark)">
               <img src="img/live/team-amit-agarwal.webp" alt="CA Amit Agarwal, CPA" loading="eager" decoding="async"></div>
@@ -85,7 +95,7 @@
             </div>
           </figure>
         </div>
-        <div class="seq__item" data-on="false" style="left:540px;top:567px;--w:0.94;--r:-1.6deg">
+        <div class="seq__item" data-on="false" style="left:575px;top:612px;--w:.76">
           <figure class="figure">
             <div class="figure__frame ar-34" style="box-shadow:var(--clay-dark)">
               <img src="img/live/team-naman-gangwal.webp" alt="CA Naman Gangwal, CPA" loading="eager" decoding="async"></div>
@@ -95,7 +105,7 @@
             </div>
           </figure>
         </div>
-        <div class="seq__item" data-on="false" style="left:900px;top:567px;--w:0.94;--r:2.0deg">
+        <div class="seq__item" data-on="false" style="left:865px;top:612px;--w:.76">
           <figure class="figure">
             <div class="figure__frame ar-34" style="box-shadow:var(--clay-dark)">
               <img src="img/live/team-akshay-nahar.webp" alt="CA Akshay Nahar" loading="eager" decoding="async"></div>
@@ -105,7 +115,7 @@
             </div>
           </figure>
         </div>
-        <div class="seq__item" data-on="false" data-cap="top" style="left:1123px;top:306px;--w:0.88;--r:-1.8deg">
+        <div class="seq__item" data-on="false" style="left:1115px;top:272px;--w:.76">
           <figure class="figure">
             <div class="figure__frame ar-34" style="box-shadow:var(--clay-dark)">
               <img src="img/live/team-nikit-bakliwal.webp" alt="CA Nikit Bakliwal" loading="eager" decoding="async"></div>
@@ -115,7 +125,7 @@
             </div>
           </figure>
         </div>
-        <div class="seq__item" data-on="false" style="left:1318px;top:423px;--w:1.0;--r:1.6deg">
+        <div class="seq__item" data-on="false" style="left:1290px;top:612px;--w:.76">
           <figure class="figure">
             <div class="figure__frame ar-34" style="box-shadow:var(--clay-dark)">
               <img src="img/live/team-disha-vakharia.webp" alt="Adv. Disha Vakharia" loading="eager" decoding="async"></div>

@@ -1,0 +1,202 @@
+/* ==========================================================================
+   USAIndiaCFO — v27 · About page "business spread"
+   The firm's footprint as a pinned, scroll-drawn map.
+
+   Everything here is additive to clay.css: same palette, same light
+   (top-left, casts +x +y), same drawn-diagram vocabulary — faint cream
+   scaffolding, one bronze line that draws itself, concentric-circle nodes,
+   Newsreader city / Inter caps subtitle.
+
+   Geometry lives in js/about-spread.js. This file owns the stage, the
+   slab's unfold, node/label states, the caption and the <940px cards.
+   ========================================================================== */
+
+/* ── section head: copy above the stage ─────────────────────────────────── */
+.spread__head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(32px, 5vw, 88px); align-items: start; }
+.spread__head h2 { margin-top: 22px; max-width: 14ch; }
+.spread__copy > * + * { margin-top: 22px; }
+
+/* ── the pin ────────────────────────────────────────────────────────────────
+   A tall wrapper; the stage sticks to the viewport top for its travel.
+   Progress p = -top / (pinHeight - stageHeight), computed in JS. */
+.spread__pin { position: relative; height: calc(100svh + 330vh);
+  margin-top: clamp(8px, 2vw, 24px); }
+.spread__stage { position: sticky; top: 0; height: 100svh; }
+.spread__ref { position: absolute; left: 0; right: 0; top: 0; height: 0;
+  visibility: hidden; pointer-events: none; }
+.spread__body { position: absolute; inset: 0;
+  transform: translate3d(0, var(--sy, 0px), 0); will-change: transform; }
+
+/* The slab is always the full stage; what the viewer sees at rest is a
+   centred, rounded WINDOW onto it (clip-path), which unfolds — width first,
+   then height, corners last — to the full viewport. No layout per frame. */
+.spread__slab { position: absolute; inset: 0;
+  border-radius: 0; box-shadow: none; overflow: hidden;
+  clip-path: inset(var(--ct, 0px) var(--cr, 0px) var(--cb, 0px) var(--cl, 0px) round var(--rr, 0px)); }
+/* The slab's cast shadow + top hairline + bottom thickness, carried by a
+   sibling sized to the window — a clipped element cannot cast outside its
+   own clip. It fades as the slab becomes the ground. */
+.spread__cast { position: absolute; left: var(--cl, 0px); top: var(--ct, 0px);
+  right: var(--cr, 0px); bottom: var(--cb, 0px); border-radius: var(--rr, 0px);
+  box-shadow: var(--clay-dark); opacity: var(--cast, 1); pointer-events: none; }
+
+.spread__svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ── caption block, bottom-left of the window ───────────────────────────── */
+.spread__cap { position: absolute; display: grid; z-index: 2;
+  left: calc(var(--cl, 0px) + clamp(28px, 3.4vw, 56px));
+  bottom: calc(var(--cb, 0px) + clamp(24px, 3.2vw, 44px)); }
+.spread__cap-item { grid-area: 1 / 1; display: grid; gap: 8px;
+  opacity: 0; transform: translate3d(0, 8px, 0);
+  transition: opacity .5s var(--ease), transform .6s var(--ease); }
+.spread__cap-item[data-on="true"] { opacity: 1; transform: none;
+  transition-delay: .12s; }
+.spread__cap-no { font: 500 10.5px/1 Inter, sans-serif; letter-spacing: .26em;
+  text-transform: uppercase; color: rgba(201, 154, 82, .92); }
+.spread__cap-line { font: 300 clamp(1.25rem, 1.6vw, 1.5rem)/1.2 Newsreader, Georgia, serif;
+  color: var(--cream); letter-spacing: -.01em; }
+.spread__count { position: absolute; z-index: 2;
+  right: calc(var(--cr, 0px) + clamp(28px, 3.4vw, 56px));
+  bottom: calc(var(--cb, 0px) + clamp(24px, 3.2vw, 44px));
+  font: 500 11px/1 Inter, sans-serif; letter-spacing: .22em;
+  color: rgba(248, 243, 232, .42); }
+
+/* ── drawn strokes (scroll-driven: JS writes stroke-dashoffset) ─────────── */
+.sp-scaffold { stroke: rgba(248, 243, 232, .11); stroke-width: 1; fill: none; }
+.sp-land { stroke: rgba(248, 243, 232, .22); stroke-width: 1.1; fill: none;
+  stroke-linejoin: round; }
+.sp-land-fill { fill: rgba(248, 243, 232, .035); stroke: none;
+  opacity: 0; transition: opacity 1.2s var(--ease); }
+.sp-land-fill[data-on="true"] { opacity: 1; }
+.sp-route, .sp-arc { stroke: #d8a24a; stroke-width: 1.8; fill: none; stroke-linecap: round; }
+.sp-arc { stroke-width: 1.7; }
+/* dash pattern 1 2 (not 1): with pathLength=1 and offset 1, a plain `1`
+   leaves a zero-length dash at the path's end, which a round cap renders
+   as a stray dot before anything has drawn. */
+.sp-dash { stroke-dasharray: 1 2; stroke-dashoffset: 1; }
+
+/* ── nodes: concentric circles that scale in ────────────────────────────── */
+.sp-node { outline: none; }
+.sp-node .sp-pop { opacity: 0; transform: scale(.55);
+  transform-box: fill-box; transform-origin: center;
+  transition: opacity .5s var(--ease), transform .6s var(--ease); }
+.sp-node[data-on="true"] .sp-pop { opacity: 1; transform: none; }
+.sp-node[data-on="false"] { pointer-events: none; }
+.sp-hit { fill: transparent; stroke: none; }
+.sp-ring-o { fill: none; stroke: rgba(248, 243, 232, .16); stroke-width: 1;
+  transition: stroke .3s var(--ease); }
+.sp-ring { fill: none; stroke: #c99a52; stroke-width: 1.2;
+  transition: stroke .3s var(--ease), stroke-width .3s var(--ease); }
+.sp-dot { fill: #d8a24a; transition: fill .3s var(--ease); }
+.sp-pulse { fill: #d8a24a; }
+.sp-pulse[data-on="false"] { opacity: 0; animation: none; }
+
+/* ── labels: city + caps, with a leader line that draws on arrival ──────── */
+.sp-label .sp-pop { opacity: 0; transform: translate3d(0, 6px, 0);
+  transition: opacity .5s var(--ease) .2s, transform .6s var(--ease) .2s; }
+.sp-label[data-on="true"] .sp-pop { opacity: 1; transform: none; }
+.sp-lead { stroke: rgba(216, 162, 74, .55); stroke-width: 1; fill: none;
+  stroke-dasharray: 1 2; stroke-dashoffset: 1;
+  transition: stroke-dashoffset .8s var(--ease) .05s, stroke .3s var(--ease); }
+.sp-label[data-on="true"] .sp-lead { stroke-dashoffset: 0; }
+.sp-city { font-family: Newsreader, Georgia, serif; font-weight: 300; font-size: 21px;
+  fill: #f8f3e8; transition: fill .3s var(--ease); }
+.sp-sub { font-family: Inter, sans-serif; font-size: 10px; letter-spacing: 2.6px;
+  fill: rgba(248, 243, 232, .55); text-transform: uppercase; transition: fill .3s var(--ease); }
+.sp-arc-cap { font-family: Inter, sans-serif; font-size: 10.5px; letter-spacing: 2.4px;
+  fill: rgba(248, 243, 232, .55); text-transform: uppercase; }
+.sp-arc-cap[data-on="false"] { opacity: 0; }
+.sp-arc-cap { transition: opacity .6s var(--ease) .1s; }
+
+/* ── hover / focus: one brightens, the rest step back ───────────────────── */
+.sp-node.is-hover .sp-ring { stroke: #d8a24a; stroke-width: 1.7; }
+.sp-node.is-hover .sp-ring-o { stroke: rgba(248, 243, 232, .36); }
+.sp-node.is-hover .sp-dot { fill: #f0c87a; }
+.sp-label.is-hover .sp-city { fill: #ffffff; }
+.sp-label.is-hover .sp-sub { fill: rgba(216, 162, 74, .95); }
+.sp-label.is-hover .sp-lead { stroke: rgba(216, 162, 74, .95); }
+[data-hovering="true"] .sp-node[data-on="true"]:not(.is-hover) .sp-pop,
+[data-hovering="true"] .sp-label[data-on="true"]:not(.is-hover) .sp-pop,
+[data-hovering="true"] .sp-label[data-on="true"]:not(.is-hover) .sp-lead { opacity: .32; }
+.sp-label .sp-lead { transition: stroke-dashoffset .8s var(--ease) .05s, stroke .3s var(--ease),
+  opacity .3s var(--ease); }
+@media (hover: hover) and (pointer: fine) { .sp-node[data-on="true"] { cursor: pointer; } }
+.sp-node:focus-visible .sp-ring-o { stroke: rgba(216, 162, 74, .7); stroke-dasharray: 3 4; }
+
+/* ── parallax layers (JS writes the transforms; off under reduced motion) ── */
+.sp-layer { will-change: transform; }
+
+/* ── reduced motion: final state, no pin, no clip ───────────────────────── */
+.spread--static .spread__pin { height: auto; padding: 0 var(--gutter); }
+.spread--static .spread__stage { position: relative; height: auto; top: auto;
+  max-width: var(--shell); margin: 0 auto; }
+.spread--static .spread__body { position: relative; inset: auto; transform: none;
+  aspect-ratio: 1440 / 760; width: 100%; max-width: calc(var(--shell) - 2 * var(--gutter)); margin: 0 auto; }
+.spread--static .spread__slab { clip-path: none; border-radius: var(--r-xl); box-shadow: var(--clay-dark); }
+.spread--static .spread__cast { display: none; }
+.spread--static .spread__cap { left: clamp(28px, 3.4vw, 56px); bottom: clamp(24px, 3.2vw, 44px); }
+.spread--static .spread__count { right: clamp(28px, 3.4vw, 56px); bottom: clamp(24px, 3.2vw, 44px); }
+.spread--static .sp-node .sp-pop, .spread--static .sp-label .sp-pop,
+.spread--static .spread__cap-item[data-on="true"] { transition: none; }
+
+/* ── <940px: two stacked cards, drawing on reveal ───────────────────────── */
+.spread__m { display: none; }
+@media (max-width: 940px) {
+  .spread__head { grid-template-columns: 1fr; gap: 26px; }
+  .spread__head h2 { max-width: 16ch; }
+  .spread__pin { display: none; }
+  .spread__m { display: block; margin-top: clamp(36px, 7vw, 56px); }
+  .spread__m-card { padding: clamp(24px, 4vw, 36px); display: grid; gap: 22px;
+    max-width: 640px; margin: 0 auto; }
+  .spread__m-card .spread__cap-item { opacity: 1; transform: none; transition: none; }
+  .spread__m-svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .spread__m-list { border-top: 1px solid var(--line-dark); }
+  .spread__m-row { display: flex; align-items: baseline; justify-content: space-between;
+    gap: 18px; width: 100%; padding: 14px 2px; border: 0; background: none; cursor: pointer;
+    border-bottom: 1px solid var(--line-dark); text-align: left; color: inherit;
+    transition: padding-left .3s var(--ease), background-color .3s var(--ease); }
+  .spread__m-row b { font: 300 1.25rem/1.2 Newsreader, Georgia, serif; color: rgba(248,243,232,.88);
+    transition: color .3s var(--ease); }
+  .spread__m-row span { font: 500 9.5px/1.6 Inter, sans-serif; letter-spacing: .18em;
+    text-transform: uppercase; color: rgba(248,243,232,.42); text-align: right; flex: 0 0 auto;
+    transition: color .3s var(--ease); }
+  .spread__m-row.is-hover, .spread__m-row:focus-visible { padding-left: 10px;
+    background: rgba(248,243,232,.05); }
+  .spread__m-row.is-hover b { color: #fff; }
+  .spread__m-row.is-hover span { color: rgba(216,162,74,.95); }
+  [data-hovering="true"] .spread__m-row:not(.is-hover) b { color: rgba(248,243,232,.4); }
+
+  /* the corridor, standing in for the arc: a short bronze spine between cards */
+  .spread__m-link { display: grid; justify-items: center; gap: 12px;
+    padding: 26px 0 22px; }
+  .spread__m-line { width: 1px; height: 44px;
+    background: linear-gradient(180deg, rgba(216,162,74,0) 0%, var(--bronze-deep) 100%); }
+  .spread__m-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bronze-bright); }
+  .spread__m-tag { font: 500 10.5px/1 Inter, sans-serif; letter-spacing: .24em;
+    text-transform: uppercase; color: var(--ink-faint); text-align: center; }
+
+  /* cards draw on reveal through the sitewide [data-draw] system; node pops
+     take their own per-node delay so Ajmer → Jaipur → Mumbai arrive in order */
+  .spread__m-svg .sp-land { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  [data-draw][data-shown="true"] .spread__m-svg .sp-land {
+    transition: stroke-dashoffset 2s var(--ease) .1s; stroke-dashoffset: 0; }
+  [data-draw][data-shown="true"] .spread__m-svg .sp-land-fill { opacity: 1; transition-delay: 1.2s; }
+  .spread__m-svg .sp-route { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  [data-draw][data-shown="true"] .spread__m-svg .sp-route {
+    transition: stroke-dashoffset 2.2s var(--ease) 1.4s; stroke-dashoffset: 0; }
+  [data-draw][data-shown="true"] .spread__m-svg .sp-node .sp-pop {
+    opacity: 1; transform: none; transition-delay: var(--d, 0s); }
+  .spread__m-svg .sp-node[data-on="false"] { pointer-events: all; }
+}
+@media (max-width: 680px) {
+  .spread__m-row { display: grid; grid-template-columns: 1fr; row-gap: 3px; }
+  .spread__m-row span { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spread__m-svg .sp-land, .spread__m-svg .sp-route { stroke-dashoffset: 0 !important; }
+  .spread__m-svg .sp-node .sp-pop { opacity: 1 !important; transform: none !important; }
+  .spread__m-svg .sp-land-fill { opacity: 1 !important; }
+  .sp-pulse { animation: none; }
+}

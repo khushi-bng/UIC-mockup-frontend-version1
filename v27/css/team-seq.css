@@ -1,0 +1,54 @@
+/* ==========================================================================
+   USAIndiaCFO — v27 team.html: the roll call, reworked.
+   Overrides for the desktop .seq section only, layered on clay.css (which is
+   not edited). Mobile (.seq-m, <= 940px) and the reduced-motion fallback
+   (.seq--static) are untouched: every rule here is scoped to .seq__item /
+   .seq__line, and clay.css's .seq--static rules out-rank these.
+
+   What changed and why:
+     · portraits stand STRAIGHT (no --r tilt) and smaller (--w .76 in the
+       markup), on a two-tier stagger — four along a low band, two crests
+       flanking the title — so every frame is >= 120 canvas px from its
+       neighbours and the title sits in the hollow between the crests;
+     · the line's motion is the event: a bronze spark rides the path ahead
+       of the portraits with a short fading tail (three dashes of the same
+       path, shorter and brighter towards the spark), and each portrait
+       lifts off the line and settles as the spark reaches it — translateY
+       + scale with a small overshoot, no rotation;
+     · captions get a little more room and may wrap, instead of running past
+       their box; nothing hangs into a neighbouring frame (measured).
+   ========================================================================== */
+
+/* straight, no tilt — the hand-laid rotation was the clutter */
+.seq__item { transform: translate(-50%, -50%); }
+
+/* lift and settle: rise off the line, scale from .92, a slight overshoot
+   on the transform only (opacity eases plainly, so nothing flashes) */
+.seq__item figure {
+  opacity: 0;
+  transform: translate3d(0, 34px, 0) scale(.92);
+  transition: opacity .5s var(--ease), transform .95s cubic-bezier(.3, 1.4, .5, 1);
+}
+.seq__item[data-on="true"] figure { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+
+/* captions: a touch wider than the frame, and the role line may wrap
+   (clay.css ellipsises it, but with the caption's centred flex items the
+   long titles overflowed the box instead — visible in the old layout) */
+.seq__item .figure__cap { left: -24px; right: -24px; margin-top: 12px; }
+.seq__item .figure__cap span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.5; }
+/* reduced-motion grid: with the caption pulled out of flow (clay.css, for
+   the canvas) a wrapped sixth frame sat on top of the row above's captions.
+   In the static grid the caption can simply take its own height. */
+.seq--static .seq__item .figure__cap { position: static; margin-top: 12px; }
+
+/* the spark's tail: clones of the drawn path (made by seq() in site.js),
+   each a short dash ending at the spark — longer and fainter further back */
+.seq__line .seq__trail { stroke: var(--bronze-bright); stroke-width: 2.2; stroke-linecap: round; }
+.seq__line .seq__trail--1 { opacity: .14; }
+.seq__line .seq__trail--2 { opacity: .32; }
+.seq__line .seq__trail--3 { opacity: .72; }
+
+/* the spark itself: a solid bronze point and one thin ring — matte, not a
+   blurred glow (the system has no glows) */
+.seq__spark { fill: var(--bronze-bright); }
+.seq__spark-ring { fill: none; stroke: var(--bronze-bright); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .32; }

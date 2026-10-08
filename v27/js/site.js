@@ -499,9 +499,13 @@
 
 
   /* ── seq: scroll-driven roll call ──────────────────────────────────────
-     Maps pin-scroll progress to how many items have arrived. The stage is
-     sticky for (items x 52vh) of travel; each threshold flips one item on.
-     Small screens and reduced motion get a plain grid instead of a pin. */
+     A pinned stage, (items x 52vh) of travel. Scroll progress draws the
+     wave; a bronze spark rides the drawn end of it (getPointAtLength) with
+     a short fading tail — three clones of the path, each a dash ending at
+     the spark — and each portrait lifts off the line once the spark has
+     passed its centre (thresholds come from the geometry: the path point
+     nearest each item, so markup positions and path stay the single source
+     of truth). Reduced motion gets the static grid instead of a pin. */
   function seq() {
     var root = one('[data-seq]');
     if (!root) return;
@@ -542,16 +546,66 @@
 
     root.style.height = (100 + items.length * 52) + 'vh';
     var count = one('.seq__count', root);
-    var line = one('.seq__line path', root);
-    var raf = 0, lastN = -1;
+    var svg = one('.seq__line', root);
+    var line = one('.seq__draw', svg) || one('path', svg);
+    var spark = one('.seq__spark', svg), ring = one('.seq__spark-ring', svg);
+
+    // The tail: clones of the drawn path, as dashes of TRAIL[i] of the path
+    // (pathLength=1) that end at the spark. Longest/faintest first so the
+    // bright short one sits on top.
+    var TRAIL = [0.07, 0.035, 0.014], trails = [];
+    if (line) TRAIL.forEach(function (len, i) {
+      var t = line.cloneNode(false);
+      t.removeAttribute('class');
+      t.setAttribute('class', 'seq__trail seq__trail--' + (i + 1));
+      t.style.strokeDasharray = len + ' 1';
+      svg.insertBefore(t, ring || null);
+      trails.push(t);
+    });
+
+    // Where along the path each portrait sits: sample the path once and
+    // take the nearest sample to each item's centre (its inline left/top,
+    // in canvas units — the same space as the SVG's viewBox). LEAD lets the
+    // spark cross the centre before the portrait rises around it.
+    var LEAD = 0.015, total = 0, thr;
+    try { total = line ? line.getTotalLength() : 0; } catch (e) { total = 0; }
+    if (total) {
+      var N = 480, pts = [], s;
+      for (s = 0; s <= N; s++) pts.push(line.getPointAtLength(total * s / N));
+      thr = items.map(function (it) {
+        var cx = parseFloat(it.style.left) || 0, cy = parseFloat(it.style.top) || 0;
+        var best = 0, bd = Infinity, i, dx, dy, d;
+        for (i = 0; i <= N; i++) {
+          dx = pts[i].x - cx; dy = pts[i].y - cy; d = dx * dx + dy * dy;
+          if (d < bd) { bd = d; best = i; }
+        }
+        return clamp(best / N + LEAD, 0, 1);
+      });
+    } else {
+      thr = items.map(function (it, i) { return (i + 1) / (items.length + 1); });
+    }
+
+    var raf = 0, lastN = -1, lastCx = '', lastCy = '';
     function apply() {
       raf = 0;
       var r = root.getBoundingClientRect();
       var span = Math.max(1, r.height - stage.offsetHeight);
       var p = clamp(-r.top / span, 0, 1);
-      // the connecting line draws continuously; portraits pop as it passes
+      // the line draws to the spark; its tail is the same path, cut to the
+      // last TRAIL[i] of it; the spark sits exactly at the drawn end
       if (line) setStyle(line, 'strokeDashoffset', (1 - p).toFixed(4));
-      var n = Math.min(items.length, Math.floor(p * (items.length + 1)));
+      for (var i = 0; i < trails.length; i++) {
+        setStyle(trails[i], 'strokeDashoffset', (TRAIL[i] - p).toFixed(4));
+      }
+      if (total && spark) {
+        var pt = line.getPointAtLength(p * total);
+        var cx = pt.x.toFixed(1), cy = pt.y.toFixed(1);
+        if (cx !== lastCx) { lastCx = cx; spark.setAttribute('cx', cx); if (ring) ring.setAttribute('cx', cx); }
+        if (cy !== lastCy) { lastCy = cy; spark.setAttribute('cy', cy); if (ring) ring.setAttribute('cy', cy); }
+      }
+      // portraits rise one by one as the spark passes them, and stay
+      var n = 0;
+      while (n < items.length && p >= thr[n]) n++;
       if (n === lastN) return;
       lastN = n;
       items.forEach(function (it, i) { it.setAttribute('data-on', i < n ? 'true' : 'false'); });

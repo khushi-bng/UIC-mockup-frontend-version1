@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..500;1,6..72,200..400&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="css/clay.css">
+<link rel="stylesheet" href="css/about-spread.css">
 </head>
 <body>
 <a href="#main" class="btn btn--clay" style="position:absolute;left:-9999px;top:12px;z-index:200"
@@ -75,47 +76,14 @@
     </div>
   </section>
 
-  <section class="section section--tight">
+  <section class="section section--tight spread" data-spread>
     <div class="shell">
-      <div class="duet">
-        <div class="duet__media">
-          <div class="clay clay--dark clay-pad-lg" data-rise="0" data-draw>
-<svg viewBox="0 0 760 470" fill="none" role="img"
-     aria-label="The New York to Bengaluru corridor" style="display:block;width:100%;height:auto">
-  <g stroke="rgba(248,243,232,.16)" stroke-width="1">
-    <path d="M40 384 Q 380 320 720 384"/>
-    <path d="M40 320 Q 380 256 720 320"/>
-    <path d="M40 256 Q 380 192 720 256"/>
-    <ellipse cx="380" cy="322" rx="345" ry="118"/>
-  </g>
-  <path class="draw--slow" pathLength="1" d="M150 330 Q 380 60 610 240"
-        stroke="#d8a24a" stroke-width="1.8" stroke-dasharray="1"/>
-  <g class="pop">
-    <circle cx="150" cy="330" r="34" stroke="rgba(248,243,232,.16)" stroke-width="1"/>
-    <circle cx="150" cy="330" r="18" stroke="#c99a52" stroke-width="1.2"/>
-    <circle cx="150" cy="330" r="5.5" fill="#d8a24a"/>
-    <text x="150" y="396" text-anchor="middle" fill="#f8f3e8"
-          font-family="Newsreader,Georgia,serif" font-size="21" font-weight="300">New York</text>
-    <text x="150" y="418" text-anchor="middle" fill="rgba(248,243,232,.55)"
-          font-family="Inter,sans-serif" font-size="10" letter-spacing="2.6">EST · FEDERAL + STATE</text>
-  </g>
-  <g class="pop">
-    <circle cx="610" cy="240" r="34" stroke="rgba(248,243,232,.16)" stroke-width="1"/>
-    <circle cx="610" cy="240" r="18" stroke="#c99a52" stroke-width="1.2"/>
-    <circle cx="610" cy="240" r="5.5" fill="#d8a24a"/>
-    <text x="610" y="306" text-anchor="middle" fill="#f8f3e8"
-          font-family="Newsreader,Georgia,serif" font-size="21" font-weight="300">Bengaluru</text>
-    <text x="610" y="328" text-anchor="middle" fill="rgba(248,243,232,.55)"
-          font-family="Inter,sans-serif" font-size="10" letter-spacing="2.6">IST · GST + ROC + FEMA</text>
-  </g>
-  <circle class="pulse" cx="380" cy="193" r="4" fill="#d8a24a"/>
-  <text x="380" y="168" text-anchor="middle" fill="rgba(248,243,232,.55)"
-        font-family="Inter,sans-serif" font-size="10.5" letter-spacing="2.4">ONE ENGAGEMENT · 9H 30M APART</text>
-</svg>          </div>
-        </div>
-        <div class="duet__copy">
+      <div class="spread__head">
+        <div>
           <span class="eyebrow" data-rise="0">The model</span>
           <h2 data-rise="0.05">Not two firms with a referral arrangement.</h2>
+        </div>
+        <div class="spread__copy">
           <p class="lede" data-rise="0.1">The usual shape is an Indian chartered accountant, a US CPA,
              and a founder in the middle translating between them. Each is competent. Neither is
              accountable for the combination — and the combination is where the group actually lives.</p>
@@ -127,6 +95,79 @@
              USAIndiaCFO — has been doing this since 2014: chartered accountants, US CPAs and legal
              professionals under one roof, working New York and India hours.</p>
           <a class="link-arrow" href="team.html" data-rise="0.25" style="margin-top:6px">Meet the people <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- The spread: a pinned stage. A dark clay slab unfolds to the full
+         viewport, then the firm's footprint draws itself in three scroll
+         stages — India (Ajmer → Jaipur → Mumbai), the corridor, the USA.
+         The SVG is built by js/about-spread.js from lon/lat data. -->
+    <div class="spread__pin">
+      <div class="spread__stage">
+        <div class="shell spread__ref" aria-hidden="true"></div>
+        <div class="spread__body">
+          <div class="spread__slab clay clay--dark">
+            <svg class="spread__svg" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid meet" role="img"
+                 aria-label="Map of the firm's footprint: offices in Ajmer, Jaipur and Mumbai; the corridor to New York; clients in New York, New Jersey, Delaware, North Carolina, South Carolina and Texas"></svg>
+            <div class="spread__cap">
+              <div class="spread__cap-item" data-on="true">
+                <span class="spread__cap-no">01 · India</span>
+                <span class="spread__cap-line">Three offices, one practice</span>
+              </div>
+              <div class="spread__cap-item" data-on="false">
+                <span class="spread__cap-no">02 · The corridor</span>
+                <span class="spread__cap-line">One engagement, both ends held</span>
+              </div>
+              <div class="spread__cap-item" data-on="false">
+                <span class="spread__cap-no">03 · The USA</span>
+                <span class="spread__cap-line">Where our US clients are</span>
+              </div>
+            </div>
+            <div class="spread__count num" aria-hidden="true">01 — 03</div>
+          </div>
+          <div class="spread__cast" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Below 940px: the same footprint as two stacked cards, each drawing
+         on reveal, with hairline rows standing in for the map labels. -->
+    <div class="spread__m">
+      <div class="shell">
+        <div class="spread__m-card clay clay--dark" data-rise="0" data-draw>
+          <div class="spread__cap-item" data-on="true">
+            <span class="spread__cap-no">01 · India</span>
+            <span class="spread__cap-line">Three offices, one practice</span>
+          </div>
+          <svg class="spread__m-svg" data-map="india" viewBox="0 0 420 300" role="img"
+               aria-label="India, with offices in Ajmer, Jaipur and Mumbai"></svg>
+          <div class="spread__m-list">
+            <button type="button" class="spread__m-row" data-node="ajmer"><b>Ajmer</b><span>Rajasthan</span></button>
+            <button type="button" class="spread__m-row" data-node="jaipur"><b>Jaipur</b><span>Rajasthan</span></button>
+            <button type="button" class="spread__m-row" data-node="mumbai"><b>Mumbai</b><span>Maharashtra</span></button>
+          </div>
+        </div>
+        <div class="spread__m-link" data-rise="0" aria-hidden="true">
+          <span class="spread__m-line"></span>
+          <span class="spread__m-dot pulse"></span>
+          <span class="spread__m-tag">One engagement · 9h 30m apart</span>
+        </div>
+        <div class="spread__m-card clay clay--dark" data-rise="0" data-draw>
+          <div class="spread__cap-item" data-on="true">
+            <span class="spread__cap-no">03 · The USA</span>
+            <span class="spread__cap-line">Where our US clients are</span>
+          </div>
+          <svg class="spread__m-svg" data-map="usa" viewBox="0 0 420 250" role="img"
+               aria-label="The USA, with clients in New York, New Jersey, Delaware, North Carolina, South Carolina and Texas"></svg>
+          <div class="spread__m-list">
+            <button type="button" class="spread__m-row" data-node="ny"><b>New York</b><span>NY · Northeast</span></button>
+            <button type="button" class="spread__m-row" data-node="nj"><b>New Jersey</b><span>NJ · Mid-Atlantic</span></button>
+            <button type="button" class="spread__m-row" data-node="de"><b>Delaware</b><span>DE · Mid-Atlantic</span></button>
+            <button type="button" class="spread__m-row" data-node="nc"><b>North Carolina</b><span>NC · Southeast</span></button>
+            <button type="button" class="spread__m-row" data-node="sc"><b>South Carolina</b><span>SC · Southeast</span></button>
+            <button type="button" class="spread__m-row" data-node="tx"><b>Texas</b><span>TX · South-central</span></button>
+          </div>
         </div>
       </div>
     </div>
@@ -291,5 +332,6 @@
 </footer>
 
 <script src="js/site.js"></script>
+<script src="js/about-spread.js"></script>
 </body>
 </html>

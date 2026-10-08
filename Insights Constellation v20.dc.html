@@ -338,12 +338,53 @@ class Component extends DCLogic {
       n: "-10px -10px 18px rgba(255,255,255,.8), 20px 26px 42px rgba(108,97,76,.36), inset 0 3px 0 rgba(255,255,255,.8)",
       f: "-12px -12px 22px rgba(255,255,255,.85), 24px 30px 50px rgba(108,97,76,.42), inset 0 4px 0 rgba(255,255,255,.85)" };
     this.scrollRef = { current: null };
+    // One-gesture reveal: the scroller's native scroll is owned by a tween
+    // (_gesture / _twStep). The ref binds the capture listeners once per element.
+    this._tw = null; this._twEnd = -1e9; this._tch = null;
     this.setScroller = (el) => {
       this.scrollRef.current = el;
       if (!el) return;
+      if (!el._v20g) { el._v20g = 1; this._bindScroller(el); }
       const span = Math.max(1, el.scrollHeight - el.clientHeight);
       const want = Math.round(this.tp * span);
       if (Math.abs(el.scrollTop - want) > 1) el.scrollTop = want;
+    };
+    this._onWheel = (e) => {
+      if (e.ctrlKey) return;                                    // pinch-zoom: not ours
+      const ady = Math.abs(e.deltaY);
+      if (Math.abs(e.deltaX) > ady) return;                     // horizontal: not ours
+      if (this.state.modal) { e.preventDefault(); return; }     // never scrub under the modal
+      const px = ady * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+      if (px >= 4) this._gesture(e.deltaY > 0 ? 1 : -1, performance.now());   // < 4px: trackpad inertia tail / jitter
+      e.preventDefault();                                       // the track holds nothing else: a wheel never scrubs
+    };
+    this._onTouchStart = (e) => {
+      const t = e.touches && e.touches[0], vp = this.vpRef.current;
+      this._tch = t ? { x: t.clientX, y: t.clientY, done: false, pan: !!(vp && vp.contains(e.target)) } : null;
+    };
+    this._onTouchMove = (e) => {
+      const g = this._tch, t = e.touches && e.touches[0];
+      if (!g || !t || !e.cancelable) return;
+      if (g.pan && this._live && !g.done && !this._tw) return;  // revealed, finger on the map: the pointer drag pans it
+      e.preventDefault();                                       // every other vertical touch is ours, from the first move
+      if (this.state.modal || g.done || this._tw) return;
+      const dy = g.y - t.clientY, dx = g.x - t.clientX;
+      if (Math.abs(dy) < 10 || Math.abs(dy) < Math.abs(dx)) return;
+      g.done = true;
+      this._gesture(dy > 0 ? 1 : -1, performance.now());
+    };
+    this._onTouchEnd = () => { this._tch = null; };
+    this._gkey = (e) => {
+      if (this.state.screen !== "map" || !this.scrollRef.current || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target, tag = t && t.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+      let dir = 0;
+      if (e.key === "ArrowDown" || e.key === "PageDown") dir = 1;
+      else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
+      else if (e.key === " " || e.key === "Spacebar") { if (tag === "BUTTON") return; dir = e.shiftKey ? -1 : 1; }
+      if (!dir) return;
+      if (this.state.modal) { e.preventDefault(); return; }
+      if (this._gesture(dir, performance.now())) e.preventDefault();
     };
     this.mScrollRef = React.createRef();
     this._wordEls = {};
@@ -525,6 +566,7 @@ class Component extends DCLogic {
     window.addEventListener("pointermove", this._move);
     window.addEventListener("pointerup", this._up);
     window.addEventListener("keydown", this._key);
+    window.addEventListener("keydown", this._gkey);
     this._vis = () => { if (document.hidden) { cancelAnimationFrame(this._raf); this._raf = 0; } else this._start(); };
     document.addEventListener("visibilitychange", this._vis);
     setTimeout(() => { this._precompute(); this._start(); }, 80);
@@ -533,6 +575,7 @@ class Component extends DCLogic {
     window.removeEventListener("pointermove", this._move);
     window.removeEventListener("pointerup", this._up);
     window.removeEventListener("keydown", this._key);
+    window.removeEventListener("keydown", this._gkey);
     document.removeEventListener("visibilitychange", this._vis);
     cancelAnimationFrame(this._raf);
   }
@@ -564,6 +607,7 @@ class Component extends DCLogic {
     const step = (ts) => {
       const dt = this._t0 ? Math.min(50, ts - this._t0) : 16.7;
       this._t0 = ts;
+      if (this._tw) this._twStep(ts);
       // critically damped spring (implicit Euler): continuous velocity, no
       // overshoot — smooth through notchy wheel input at any frame rate
       const om = 5.6, dts = dt / 1000;
@@ -579,6 +623,45 @@ class Component extends DCLogic {
       this._raf = requestAnimationFrame(step);
     };
     this._raf = requestAnimationFrame(step);
+  }
+
+  // ── one-gesture reveal ────────────────────────────────────────────────────
+  // A single wheel tick / swipe / key plays the whole reveal: scrollTop is
+  // tweened 0 → span (or back) over TW_MS with easeInOutCubic from inside the
+  // rAF loop, so tp / p / _apply remain exactly the scrubbed pipeline — only
+  // the input is replaced. Returns true when the event belongs to the reveal.
+  _gesture(dir, now) {
+    const el = this.scrollRef.current;
+    if (!el || this.state.modal) return false;
+    if (this._tw) return true;                                  // playing: ignore further gestures
+    if (now - this._twEnd < 300) return true;                   // settle window: swallow the gesture's own tail
+    const span = Math.max(1, el.scrollHeight - el.clientHeight);
+    const to = dir > 0 ? span : 0;
+    if (Math.abs(el.scrollTop - to) < 1) return false;          // already at that end: leave native scroll-chaining alone
+    this._tw = { from: el.scrollTop, dir, t0: 0, dur: this._reduced ? 0 : this.TW_MS };
+    this._start();
+    return true;
+  }
+  get TW_MS() { return 1800; }
+  _twStep(ts) {
+    const tw = this._tw, el = this.scrollRef.current;
+    if (!el) { this._tw = null; return; }
+    if (!tw.t0) tw.t0 = ts;
+    const k = tw.dur > 0 ? Math.min(1, (ts - tw.t0) / tw.dur) : 1;
+    const span = Math.max(1, el.scrollHeight - el.clientHeight);
+    const to = tw.dir > 0 ? span : 0;
+    const v = k >= 1 ? to : tw.from + (to - tw.from) * this._ez(k);
+    el.scrollTop = v;
+    this.tp = this._cl(v / span);
+    this.p = this.tp; this.pv = 0;                              // p rides the tween: no spring lag, no tail
+    if (k >= 1) { this._tw = null; this._twEnd = ts; }
+  }
+  _bindScroller(el) {
+    el.addEventListener("wheel", this._onWheel, { passive: false });
+    el.addEventListener("touchstart", this._onTouchStart, { passive: true });
+    el.addEventListener("touchmove", this._onTouchMove, { passive: false });
+    el.addEventListener("touchend", this._onTouchEnd);
+    el.addEventListener("touchcancel", this._onTouchEnd);
   }
 
   _apply(P, ts) {
